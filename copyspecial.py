@@ -19,17 +19,40 @@ import argparse
 
 def get_special_paths(dirname):
     """Given a dirname, returns a list of all its special files."""
-    # your code here
-    return
+    name_dir = [
+        os.path.abspath(os.path.join(dirname, f))
+        for f in os.listdir(dirname)
+        if re.search(r'__(\w+)__', f )]
+
+    return name_dir
 
 
 def copy_to(path_list, dest_dir):
-    # your code here
-    return
+    """copies path to a new directory"""
+    try:
+        os.makedirs(dest_dir)
+    except OSError as e:
+        print(e)    
+        exit(1)
+    for path in path_list:
+        file_name = os.path.basename(path)
+        current_path = os.path.dirname(path) 
+        new_path = os.path.join(current_path, dest_dir, file_name)
+        shutil.copyfile(path, new_path)   
 
 
 def zip_to(path_list, dest_zip):
-    # your code here
+    """copies lis to a new zip file"""
+    file_zip = []
+    for path in path_list:
+        file_zip.append(path)
+    try:
+        print(type(file_zip))
+        subprocess.call(["zip", "-j", dest_zip] + file_zip)
+    except OSError as e:
+        print(e)
+        exit(1) 
+
     return
 
 
@@ -39,18 +62,22 @@ def main(args):
     parser = argparse.ArgumentParser()
     parser.add_argument('--todir', help='dest dir for special files')
     parser.add_argument('--tozip', help='dest zipfile for special files')
-    # TODO: add one more argument definition to parse the 'from_dir' argument
+    parser.add_argument('from_dir', help= 'dir search for files')
     ns = parser.parse_args(args)
 
-    # TODO: you must write your own code to get the command line args.
-    # Read the docs and examples for the argparse module about how to do this.
+    if not ns:
+        parser.print_usage()
+        sys.exit(1)
+    if ns.todir:
+        copy_to(get_special_paths(ns.from_dir), ns.todir)
+    if ns.tozip:
+        zip_to(get_special_paths(ns.from_dir), ns.tozip) 
+    
+    path_list = get_special_paths(ns.from_dir)
+    for path in path_list:
+        print(path)
 
-    # Parsing command line arguments is a must-have skill.
-    # This is input data validation. If something is wrong (or missing) with
-    # any required args, the general rule is to print a usage message and
-    # exit(1).
-
-    # Your code here: Invoke (call) your functions
+   
 
 
 if __name__ == "__main__":
